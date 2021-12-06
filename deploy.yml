@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: automatt-main-config
+  labels:
+    app: "automatt"
+    release : "main"
+data:
+    ENV: "production"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "automatt-main-dpy"
+spec:
+  selector:
+    matchLabels:
+        app: "automatt"
+        release : "main"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "automatt"
+        release : "main"
+    spec:
+      containers:
+      - name: "automatt-main"
+        image: bam.brud.local:6000/brudtech/automatt:latest          
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8800
+        envFrom:
+          - configMapRef:
+              name: automatt-main-config
+        volumeMounts:
+        - name: automatt-secret-vol
+          mountPath: "/home/user/.kube"
+          readOnly: true    
+
+      volumes:
+        - name: automatt-secret-vol
+          secret:
+            secretName: automatt-secret
+            items:
+            - key: kubeconfig
+              path: config
+      imagePullSecrets:
+      - name: regcred 
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "automatt-main-svc"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8800
+    targetPort: 8800
+  selector:
+    app: "automatt"
+    release : "main"

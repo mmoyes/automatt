@@ -1,0 +1,1 @@
+kubectl delete pod $(kubectl get pods | grep votingbackend-stable-dpy | awk '{print $1;}')
