@@ -18,7 +18,9 @@ docker run \
 ```
 go build && \
 docker build -t bam.brud.local:6000/brudtech/automatt:latest . && \
-docker push bam.brud.local:6000/brudtech/automatt:latest
+docker push bam.brud.local:6000/brudtech/automatt:latest && \
+kubectl patch deployment automatt-main-dpy -p \
+  "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
 ```
 
 deploy.yml and secret
