@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os/exec"
@@ -40,6 +41,17 @@ func TestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// https://automatt.brud.dev/api/linear/issues
+	if vars["category"] == "linear" {
+		if vars["cmd"] == "issue" {
+			data, _ := ioutil.ReadAll(r.Body)
+			fmt.Printf("Req: %v\n", string(data))
+			for name, val := range r.Header {
+				fmt.Printf("\t %s: %v\n", name, val)
+			}
+		}
+	}
+
 	if vars["category"] == "kube" {
 
 		if vars["cmd"] == "BE-reset" {
@@ -74,4 +86,17 @@ func RunCmd(cmd string, args ...string) (string, error) {
 		return errb.String(), err
 	}
 	return outb.String(), nil
+}
+
+func TranslateLinearProjectToGitRepo(linearProject string) string {
+
+	switch linearProject {
+	case "MVP VT Backend":
+		return "brudfyi/voting-tool"
+	case "MVP VT Frontend":
+		return "brudfyi/voting-tool-ui"
+	default:
+		return ""
+	}
+
 }
